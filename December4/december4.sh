@@ -27,7 +27,6 @@ check_neighbour() {
 
     for row_direction in -1 0 1; do
         for column_direction in -1 0 1; do
-            # We don't give a sh*t about the 0,0 pos
             if [[ $row_direction -eq 0 && $column_direction -eq 0 ]]; then
                 continue
             fi
