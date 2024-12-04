@@ -2,16 +2,23 @@
 
 declare -a grid
 rows=0
+cols=0
 
+# Read the input file and populate the grid
 while IFS= read -r line; do
-    cols=0
-    for char in $line; do
-        grid[$((rows * 10 + cols))]=$char
-        ((cols++))
+    cols=${#line}  # Set cols to the length of the current line
+    for ((i=0; i<cols; i++)); do
+        char="${line:$i:1}"
+        grid[$((rows * cols + i))]=$char
     done
     ((rows++))
 done <input.txt
 
+echo "Rows: $rows"
+echo "Cols: $cols"
+echo "Grid: ${grid[@]}"
+
+# Function to check neighbours
 check_neighbour() {
     local row=$1
     local col=$2
@@ -21,7 +28,6 @@ check_neighbour() {
 
     local index=$((row * cols + col))
     if [[ "${grid[$index]}" != "$from_char" ]]; then
-        echo "C'est perdu"
         return 1
     fi
 
@@ -37,7 +43,7 @@ check_neighbour() {
             if (( neighbour_on_row >= 0 && neighbour_on_row < rows && neighbour_on_column >= 0 && neighbour_on_column < cols )); then
                 local neighbour=$((neighbour_on_row * cols + neighbour_on_column))
                 if [[ "${grid[$neighbour]}" == "$to_char" ]]; then
-                    indices+=("$neighbour")
+                    indices+=("$neighbour:$neighbour_on_row:$neighbour_on_column:$row_direction:$column_direction")
                 fi
             fi
         done
@@ -46,11 +52,51 @@ check_neighbour() {
     echo "${indices[@]}"
 }
 
+# Function to check the sequence XMAS
+check_sequence() {
+    local row=$1
+    local col=$2
+    local row_direction=$3
+    local col_direction=$4
+
+    local next_row=$((row + row_direction))
+    local next_col=$((col + col_direction))
+    echo "Checking sequence from ($row, $col) in direction ($row_direction, $col_direction)"
+    if (( next_row >= 0 && next_row < rows && next_col >= 0 && next_col < cols )); then
+        local next_index=$((next_row * cols + next_col))
+        echo "Next position: ($next_row, $next_col) with index $next_index and character ${grid[$next_index]}"
+        if [[ "${grid[$next_index]}" == "A" ]]; then
+            next_row=$((next_row + row_direction))
+            next_col=$((next_col + col_direction))
+            if (( next_row >= 0 && next_row < rows && next_col >= 0 && next_col < cols )); then
+                next_index=$((next_row * cols + next_col))
+                echo "Next position: ($next_row, $next_col) with index $next_index and character ${grid[$next_index]}"
+                if [[ "${grid[$next_index]}" == "S" ]]; then
+                    echo "Found a sequence"
+                    return 0
+                fi
+            fi
+        fi
+    fi
+    return 1
+}
+
+counter=0
+
+# Main loop to check for sequences
 for ((row = 0; row < rows; row++)); do
     for ((col = 0; col < cols; col++)); do
-        if [[ "${grid[$row, $col]}" == "X" ]]; then
-            neighbours=$(check_neighbour row col)
-            echo "$neighbours"
+        if [[ "${grid[$((row * cols + col))]}" == "X" ]]; then
+            neighbours=$(check_neighbour $row $col)
+            for neighbour in $neighbours; do
+                IFS=':' read -r neighbour_index neighbour_row neighbour_column row_direction col_direction <<< "$neighbour"
+                if check_sequence $neighbour_row $neighbour_column $row_direction $col_direction; then
+                    echo "Heyyyyy"
+                    ((counter++))
+                fi
+            done
         fi
     done
 done
+
+echo "Total sequences found: $counter"
