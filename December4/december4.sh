@@ -4,9 +4,8 @@ declare -a grid
 rows=0
 cols=0
 
-# Read the input file and populate the grid
 while IFS= read -r line; do
-    cols=${#line}  # Set cols to the length of the current line
+    cols=${#line}
     for ((i=0; i<cols; i++)); do
         char="${line:$i:1}"
         grid[$((rows * cols + i))]=$char
@@ -18,7 +17,6 @@ echo "Rows: $rows"
 echo "Cols: $cols"
 echo "Grid: ${grid[@]}"
 
-# Function to check neighbours
 check_neighbour() {
     local row=$1
     local col=$2
@@ -52,7 +50,6 @@ check_neighbour() {
     echo "${indices[@]}"
 }
 
-# Function to check the sequence XMAS
 check_sequence() {
     local row=$1
     local col=$2
@@ -83,7 +80,6 @@ check_sequence() {
 
 counter=0
 
-# Main loop to check for sequences
 for ((row = 0; row < rows; row++)); do
     for ((col = 0; col < cols; col++)); do
         if [[ "${grid[$((row * cols + col))]}" == "X" ]]; then
