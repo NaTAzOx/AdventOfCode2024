@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "BTUPpCyMdJY=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\NaTAzOx\\OneDrive\\Bureau\\aoc\\DecemberTheThird\\DecemberTheThird.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\NaTAzOx\\.nuget\\packages\\fsharp.core\\8.0.401\\fsharp.core.8.0.401.nupkg.sha512"
+  ],
+  "logs": []
+}
