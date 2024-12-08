@@ -7,5 +7,6 @@
 - Day 5 : Python (enjoyment : 8/10)
 - Day 6 : Go (enjoyment : 7/10)
 - Day 7 : Rust (enjoyment : 2/10)
+- Day 8 : TypeScript (enjoyment : 7/10)
 
 ### Note : the enjoyment is only determined by the language used 
