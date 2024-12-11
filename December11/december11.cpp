@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <cstdint>
 using namespace std;
 
 vector<string> split(string& str, string& pattern) {
@@ -18,7 +19,7 @@ vector<string> split(string& str, string& pattern) {
   return tokens;
 }
 
-int countDigits(int number) {
+int countDigits(uint64_t number) {
   if (number == 0) {
     return 1;
   }
@@ -33,9 +34,9 @@ int countDigits(int number) {
   return count;
 }
 
-vector<long> process(vector<long> previousNumbers) {
-  vector<long> result;
-  for (int number : previousNumbers) {
+vector<uint64_t> process(vector<uint64_t> previousNumbers) {
+  vector<uint64_t> result;
+  for (uint64_t number : previousNumbers) {
     int digits = countDigits(number);
     
     if (digits % 2 == 0) {
@@ -44,8 +45,8 @@ vector<long> process(vector<long> previousNumbers) {
       cout << "previous : " << number << endl;
       string secondHalfString = numberToSplit.substr(numberToSplit.length() / 2);
       cout << "first : " << firstHalfString << " second : " << secondHalfString << endl;
-      long firstHalf = stol(firstHalfString);
-      long secondHalf = stol(secondHalfString);
+      uint64_t firstHalf = stol(firstHalfString);
+      uint64_t secondHalf = stol(secondHalfString);
       result.push_back(firstHalf);
       result.push_back(secondHalf);
     } else {
@@ -64,8 +65,8 @@ int main() {
 	ifstream file("input");
 	string str;
 	getline(file, str);
-	vector<long> numbers;
-	long number;
+	vector<uint64_t> numbers;
+	uint64_t number;
 	string pattern = " ";
 	int occurrence = 1;
 	
@@ -75,7 +76,16 @@ int main() {
 	  numbers.push_back(number);
 	}
 	
+	// part 1
 	while (occurrence <= 25) {
+	  numbers = process(numbers);
+	  occurrence++;
+	}
+	
+	cout << numbers.size() << endl;
+	
+	// part 2
+	while (occurrence <=75) {
 	  numbers = process(numbers);
 	  occurrence++;
 	}
