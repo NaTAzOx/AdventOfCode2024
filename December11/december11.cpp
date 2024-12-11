@@ -33,21 +33,26 @@ int countDigits(int number) {
   return count;
 }
 
-vector<int> process(vector<int> previousNumbers) {
-  vector<int> result;
-  for (auto number : previousNumbers) {
+vector<long> process(vector<long> previousNumbers) {
+  vector<long> result;
+  for (int number : previousNumbers) {
     int digits = countDigits(number);
     
     if (digits % 2 == 0) {
       string numberToSplit = to_string(number);
-      int firstHalf = stoi(numberToSplit.substr(0, numberToSplit.length() / 2));
-      int secondHalf = stoi(numberToSplit.substr(numberToSplit.length() / 2));
+      string firstHalfString = numberToSplit.substr(0, numberToSplit.length() / 2);
+      cout << "previous : " << number << endl;
+      string secondHalfString = numberToSplit.substr(numberToSplit.length() / 2);
+      cout << "first : " << firstHalfString << " second : " << secondHalfString << endl;
+      long firstHalf = stol(firstHalfString);
+      long secondHalf = stol(secondHalfString);
       result.push_back(firstHalf);
       result.push_back(secondHalf);
     } else {
       if (number == 0) {
         result.push_back(1);
       } else {
+        cout << "previous : " << number <<  " result : " << number*2024 << endl;
         result.push_back(number * 2024);
       }
     }
@@ -59,13 +64,13 @@ int main() {
 	ifstream file("input");
 	string str;
 	getline(file, str);
-	vector<int> numbers;
-	int number;
+	vector<long> numbers;
+	long number;
 	string pattern = " ";
 	int occurrence = 1;
 	
 	for (auto numChar : split(str, pattern)) {
-	  number = stoi(numChar);
+	  number = stol(numChar);
 	  cout << number << endl;
 	  numbers.push_back(number);
 	}
