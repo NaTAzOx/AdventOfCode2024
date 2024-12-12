@@ -3,92 +3,94 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
+#include <stdexcept>
+#include <string_view>
+#include <unordered_map>
 using namespace std;
 
-vector<string> split(string& str, string& pattern) {
-  vector<string> tokens;
-  size_t pos = 0;
-  string token;
-  while ((pos = str.find(pattern)) != string::npos) {
-    token = str.substr(0 ,pos);
-    tokens.push_back(token);
-    str.erase(0, pos + pattern.length());
-  }
-  tokens.push_back(str);
-  
-  return tokens;
+vector<string_view> split(const string& str, const string& pattern) {
+    vector<string_view> tokens;
+    size_t pos = 0, start = 0;
+    while ((pos = str.find(pattern, start)) != string::npos) {
+        tokens.emplace_back(str.data() + start, pos - start);
+        start = pos + pattern.length();
+    }
+    tokens.emplace_back(str.data() + start, str.length() - start);
+    return tokens;
 }
 
 int countDigits(uint64_t number) {
-  if (number == 0) {
-    return 1;
-  }
-  
-  int count = 0;
-  
-  while (number != 0) {
-    number = number / 10;
-    count++;
-  }
-  
-  return count;
+    int digits = 0;
+    do {
+        ++digits;
+        number /= 10;
+    } while (number != 0);
+    return digits;
 }
 
-vector<uint64_t> process(vector<uint64_t> previousNumbers) {
-  vector<uint64_t> result;
-  for (uint64_t number : previousNumbers) {
-    int digits = countDigits(number);
-    
-    if (digits % 2 == 0) {
-      string numberToSplit = to_string(number);
-      string firstHalfString = numberToSplit.substr(0, numberToSplit.length() / 2);
-      cout << "previous : " << number << endl;
-      string secondHalfString = numberToSplit.substr(numberToSplit.length() / 2);
-      cout << "first : " << firstHalfString << " second : " << secondHalfString << endl;
-      uint64_t firstHalf = stol(firstHalfString);
-      uint64_t secondHalf = stol(secondHalfString);
-      result.push_back(firstHalf);
-      result.push_back(secondHalf);
-    } else {
-      if (number == 0) {
-        result.push_back(1);
-      } else {
-        cout << "previous : " << number <<  " result : " << number*2024 << endl;
-        result.push_back(number * 2024);
-      }
+void process(unordered_map<uint64_t, uint64_t>& numbers) {
+    unordered_map<uint64_t, uint64_t> result;
+    for (const auto& [number, count] : numbers) {
+        int digits = countDigits(number);
+        if (digits % 2 == 0) {
+            string numberToSplit = to_string(number);
+            size_t halfLength = numberToSplit.length() / 2;
+            uint64_t firstHalf = stoull(numberToSplit.substr(0, halfLength));
+            uint64_t secondHalf = stoull(numberToSplit.substr(halfLength));
+            result[firstHalf] += count;
+            result[secondHalf] += count;
+        } else {
+            uint64_t newNumber = (number == 0) ? 1 : number * 2024;
+            result[newNumber] += count;
+        }
     }
-  }
-  return result;
+    numbers = move(result);
 }
 
 int main() {
-	ifstream file("input");
-	string str;
-	getline(file, str);
-	vector<uint64_t> numbers;
-	uint64_t number;
-	string pattern = " ";
-	int occurrence = 1;
-	
-	for (auto numChar : split(str, pattern)) {
-	  number = stol(numChar);
-	  cout << number << endl;
-	  numbers.push_back(number);
-	}
-	
-	// part 1
-	while (occurrence <= 25) {
-	  numbers = process(numbers);
-	  occurrence++;
-	}
-	
-	cout << numbers.size() << endl;
-	
-	// part 2
-	while (occurrence <=75) {
-	  numbers = process(numbers);
-	  occurrence++;
-	}
-	
-	cout << numbers.size() << endl;
+    ifstream file("input.txt");
+    string str;
+    getline(file, str);
+    unordered_map<uint64_t, uint64_t> numbers;
+    string pattern = " ";
+    for (const auto& numChar : split(str, pattern)) {
+        if (!numChar.empty()) {
+            try {
+                uint64_t number = stoull(string(numChar));
+                numbers[number]++;
+            } catch (const invalid_argument& e) {
+                cerr << "Invalid argument: " << numChar << " cannot be converted to uint64_t" << endl;
+            } catch (const out_of_range& e) {
+                cerr << "Out of range: " << numChar << " is out of range for uint64_t" << endl;
+            }
+        }
+    }
+
+    uint64_t result = 0;
+
+    // part 1
+    for (int occurrence = 1; occurrence <= 25; ++occurrence) {
+        process(numbers);
+        cout << occurrence << endl;
+    }
+
+    for (auto [number, count] : numbers) {
+        result += count;
+    }
+
+    cout << result << endl;
+
+    // part 2
+    for (int occurrence = 26; occurrence <= 75; ++occurrence) {
+        process(numbers);
+        cout << occurrence << endl;
+    }
+
+    result = 0;
+
+    for (auto [number, count] : numbers) {
+        result += count;
+    }
+
+    cout << result << endl;
 }
