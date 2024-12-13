@@ -10,5 +10,6 @@
 - Day 8 : TypeScript (enjoyment : 7/10)
 - Day 9 : OCaml [NOT FINISHED] (enjoyment : 0/10)
 - Day 10 : Perl (enjoyment : 8.5/10)
+- Day 11 : C++ (enjoyment : 6/10)
 
 ### Note : the enjoyment is only determined by the language used 
