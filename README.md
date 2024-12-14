@@ -12,5 +12,7 @@
 - Day 10 : Perl (enjoyment : 8.5/10)
 - Day 11 : C++ (enjoyment : 6/10)
 - Day 12 : Gleam! [NOT FINISHED] (enjoyment : 1.5/10)
+- Day 13 : Pascal [NOT FINISHED] (enjoyment : 4/10)
+- Day 14 : Scala [INCOMING]
 
 ### Note : the enjoyment is only determined by the language used 
