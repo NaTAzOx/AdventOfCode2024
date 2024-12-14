@@ -11,5 +11,6 @@
 - Day 9 : OCaml [NOT FINISHED] (enjoyment : 0/10)
 - Day 10 : Perl (enjoyment : 8.5/10)
 - Day 11 : C++ (enjoyment : 6/10)
+- Day 12 : Gleam! [NOT FINISHED] (enjoyment : 1.5/10)
 
 ### Note : the enjoyment is only determined by the language used 
