@@ -1,85 +1,120 @@
-program ClawMachine;
+{$mode objfpc}
+{$H+}                 // Active le mode de gestion des chaînes avec mémoire dynamique
+{$I-,Q-,R-}           // Désactive certaines erreurs d'entrée/sortie et de runtime
+{$APPTYPE CONSOLE}    // Spécifie que le programme est une application console
+{$IFDEF FPC}
+    {$CODEPAGE UTF-8} // Définit l'encodage en UTF-8 pour Free Pascal Compiler
+{$ENDIF}
+
+program ClawMachineSolver;
 
 uses
-    SysUtils, Classes;
+  SysUtils, Classes, Math;
 
 type
-    TButton = record
-        X, Y: Integer;
-        Cost: Integer;
-    end;
+  TButton = record
+    X, Y, Cost: Integer;
+  end;
 
-    TPrize = record
-        X, Y: Integer;
-    end;
+  TPrize = record
+    X, Y: Integer;
+  end;
 
+function ParseValue(const Text, Prefix: string): Integer;
 var
-    Buttons: array[1..2] of TButton;
-    Prizes: array of TPrize;
-    Lines: TStringList;
-    Line: string;
-    PrizeCount, i, j, MinTokens, Tokens: Integer;
-
-function ExtractWord(N: Integer; const S: string; const WordDelims: TSysCharSet): string;
-var
-    I, J, Count: Integer;
+  StartPos: Integer;
+  ValueStr: string;
 begin
-    I := 1;
-    Count := 0;
-    while (I <= Length(S)) and (Count < N) do
-    begin
-        while (I <= Length(S)) and (S[I] in WordDelims) do
-            Inc(I);
-        if I <= Length(S) then
-            Inc(Count);
-        if Count < N then
-            while (I <= Length(S)) and not (S[I] in WordDelims) do
-                Inc(I);
-    end;
-    J := I;
-    while (J <= Length(S)) and not (S[J] in WordDelims) do
-        Inc(J);
-    ExtractWord := Copy(S, I, J - I);
+  StartPos := Pos(Prefix, Text);
+  if StartPos = 0 then
+    raise Exception.CreateFmt('Prefix "%s" not found in "%s"', [Prefix, Text]);
+
+  ValueStr := Copy(Text, StartPos + Length(Prefix), MaxInt);
+  ValueStr := Trim(ValueStr);
+
+  if ValueStr = '' then
+    raise Exception.CreateFmt('No value found after prefix "%s" in "%s"', [Prefix, Text]);
+
+  Result := StrToInt(ValueStr);
 end;
 
-procedure ReadInputFile(const FileName: string);
+function CalculateCost(ButtonA, ButtonB: TButton; Prize: TPrize; MaxPress: Integer): Integer;
+var
+  aPress, bPress: Integer;
+  MinCost: Integer;
 begin
-    Lines := TStringList.Create;
-    try
-        Lines.LoadFromFile(FileName);
-        PrizeCount := StrToInt(Lines[0]);
-        SetLength(Prizes, PrizeCount);
+  MinCost := MaxInt;
 
-        for i := 0 to PrizeCount - 1 do
-        begin
-            Line := Lines[i + 1];
-            Prizes[i].X := StrToInt(ExtractWord(1, Line, [' ']));
-            Prizes[i].Y := StrToInt(ExtractWord(2, Line, [' ']));
-        end;
-    finally
-        Lines.Free;
+  // Tester toutes les combinaisons de pressions sur les boutons
+  for aPress := 0 to MaxPress do
+    for bPress := 0 to MaxPress do
+    begin
+      if (aPress * ButtonA.X + bPress * ButtonB.X = Prize.X) and
+         (aPress * ButtonA.Y + bPress * ButtonB.Y = Prize.Y) then
+      begin
+        MinCost := Min(MinCost, aPress * ButtonA.Cost + bPress * ButtonB.Cost);
+      end;
     end;
+
+  if MinCost = MaxInt then
+    Result := -1 // Pas de solution
+  else
+    Result := MinCost;
+end;
+
+function SolveClawMachine(const FileName: string): Integer;
+var
+  Lines: TStringList;
+  i, PrizeCount, TokensSpent, MaxPress: Integer;
+  ButtonA, ButtonB: TButton;
+  Prize: TPrize;
+  Line: string;
+  Cost: Integer;
+begin
+  Lines := TStringList.Create;
+  try
+    Lines.LoadFromFile(FileName);
+    WriteLn('Total lines: ', Lines.Count);
+    if (Lines.Count mod 3) <> 0 then
+      raise Exception.Create('Invalid input file format: lines must be a multiple of 3.');
+
+    TokensSpent := 0;
+    PrizeCount := 0;
+    MaxPress := 100;
+
+    for i := 0 to (Lines.Count div 3) - 1 do
+    begin
+      // Lire les configurations des boutons et des prix
+      Line := Lines[i * 3];
+      ButtonA.X := ParseValue(Line, 'X+');
+      ButtonA.Y := ParseValue(Line, 'Y+');
+      ButtonA.Cost := 3; // Coût par défaut pour A
+
+      Line := Lines[i * 3 + 1];
+      ButtonB.X := ParseValue(Line, 'X+');
+      ButtonB.Y := ParseValue(Line, 'Y+');
+      ButtonB.Cost := 1; // Coût par défaut pour B
+
+      Line := Lines[i * 3 + 2];
+      Prize.X := ParseValue(Line, 'X=');
+      Prize.Y := ParseValue(Line, 'Y=');
+
+      Cost := CalculateCost(ButtonA, ButtonB, Prize, MaxPress);
+      if Cost <> -1 then
+        TokensSpent := TokensSpent + Cost;
+    end;
+
+    Result := TokensSpent;
+  finally
+    Lines.Free;
+  end;
 end;
 
 begin
-    // Initialize buttons
-    Buttons[1].X := 1; Buttons[1].Y := 1; Buttons[1].Cost := 2;
-    Buttons[2].X := 2; Buttons[2].Y := 2; Buttons[2].Cost := 3;
-
-    // Read input file
-    ReadInputFile('input.txt');
-
-    // Process prizes
-    MinTokens := MaxInt;
-    for i := 0 to PrizeCount - 1 do
-    begin
-        for j := 1 to 2 do
-        begin
-            Tokens := Abs(Prizes[i].X - Buttons[j].X) + Abs(Prizes[i].Y - Buttons[j].Y) + Buttons[j].Cost;
-            if Tokens < MinTokens then
-                MinTokens := Tokens;
-        end;
-    end;
-
-    WriteLn('Minimum tokens needed: ', MinTokens);
+  try
+    WriteLn('Total tokens spent:', SolveClawMachine('input.txt'));
+  except
+    on E: Exception do
+      WriteLn(E.ClassName, ': ', E.Message);
+  end;
 end.
