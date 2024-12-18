@@ -15,6 +15,7 @@
 - Day 13 : Pascal [NOT FINISHED] (enjoyment : 4/10)
 - Day 14 : Scala (enjoyment : 7.5/10)
 - Day 15 : EmojiCode [NOT FINISHED] (enjoyment : no)
-- Day 16 : Java [NOT FINISHED] (enjoyment : 5/10)
+- Day 16 : Java [NOT FINISHED] (enjoyment : 6.5/10)
+- Day 17 : C [NOT FINISHED] (enjoyment : 5.5/10)
 
 ### Note : the enjoyment is only determined by the language used 
