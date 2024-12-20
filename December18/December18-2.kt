@@ -1,29 +1,6 @@
 import java.util.*
 
-class Position(val x: Int, val y: Int) : Comparable<Position> {
-    operator fun plus(other: Position) = Position(x + other.x, y + other.y)
-
-    override fun compareTo(other: Position): Int {
-        if (x == other.x) {
-            return y.compareTo(other.y)
-        }
-        return x.compareTo(other.x)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Position) return false
-        return x == other.x && y == other.y
-    }
-
-    override fun hashCode(): Int {
-        return 31 * x + y
-    }
-
-    override fun toString() = "($x, $y)"
-}
-
-class December18 {
+class December18_2 {
     fun readInput(s: String, readLimit: Int): List<Position> {
         val lines = this::class.java.getResource(s)?.readText()?.trim()?.split("\n")
         val positions = mutableListOf<Position>()
@@ -49,7 +26,11 @@ class December18 {
         return positions
     }
 
-    fun initializeMap(width: Int, height: Int, walls: List<Position>): Map<Position, String> {
+    fun getLines(path : String) : List<String> {
+        return this::class.java.getResource(path)?.readText()?.trim()?.split("\n") ?: emptyList()
+    }
+
+    fun initializeMap(width: Int, height: Int, walls: List<Position>): MutableMap<Position, String> {
         val map = mutableMapOf<Position, String>()
         for (x in 0..width) {
             for (y in 0..height) {
@@ -94,17 +75,22 @@ class December18 {
 }
 
 fun main() {
-    val d = December18()
+    val d = December18_2()
     val positions = d.readInput("input.txt", 1024)
     val map = d.initializeMap(70, 70, positions)
 
-    for (y in 0..70) {
-        for (x in 0..70) {
-            print(map[Position(x, y)])
+    var path = d.findShortestPath(map, Position(0, 0), Position(70, 70))
+    var lineIndex = 1025
+    while (path !== -1) {
+        val lines = d.getLines("input.txt")
+        val newWall = lines[lineIndex].split(",").map { it.trim() }
+        val (x, y) = newWall.map { it.toInt() }
+        map[Position(x, y)] = "#"
+        path = d.findShortestPath(map, Position(0, 0), Position(70, 70))
+        if (path === -1) {
+            println("$x, $y")
+            break
         }
-        println()
+        lineIndex++
     }
-
-    val path = d.findShortestPath(map, Position(0, 0), Position(70, 70))
-    println(path)
 }
