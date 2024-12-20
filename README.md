@@ -17,5 +17,8 @@
 - Day 15 : EmojiCode [NOT FINISHED] (enjoyment : no)
 - Day 16 : Java [NOT FINISHED] (enjoyment : 6.5/10)
 - Day 17 : C [NOT FINISHED] (enjoyment : 5.5/10)
+- Day 18 : Kotlin (enjoyment : 7.5/10)
+- Day 19 : Dreamberd [NOT STARTED] (enjoyment : ?/10)
+- Day 20 : Haskell [NOT FINISHED] (enjoyment : 1.5/10)
 
 ### Note : the enjoyment is only determined by the language used 
