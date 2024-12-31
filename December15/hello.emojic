@@ -1,0 +1,18 @@
+📦 files 🏠
+
+🏁 🍇
+  🍺🆕📄▶️📜 🔤input.txt🔤❗️ ➡️ readFile
+  ❓ readFile ❗️ 🍇
+    😀 🔤Impossible d’ouvrir le fichier.🔤❗️
+    🍷
+  🍉
+
+  🔁 readFile 📓 1024 ➡️ line 🍇
+    ❓ line ❗️ 🍇
+      🍷
+    🍉
+    😀 line❗️
+  🍉
+
+  readFile 🚪❗️
+🍉

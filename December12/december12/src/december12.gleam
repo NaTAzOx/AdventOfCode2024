@@ -1,138 +1,119 @@
+import gleam/int
 import gleam/io
 import gleam/list
 import gleam/string
+import gleam/string_tree
 
 type Position {
   Pos(Int, Int)
 }
 
 type Map {
-  Map(Position, String)
+  Map(List(#(Position, String)))
 }
 
-// Parse the input string into a map
 fn parse_map(input: String) -> Map {
   input
   |> string.split("\n")
-  |> list.indexed_map(fn(row_index, row) {
-    row
-    |> string.to_graphemes()
-    |> list.indexed_map(fn(col_index, c) { tuple(Pos(row_index, col_index), c) })
+  |> list.index_map(fn(_row_index, row) {
+    let graphemes = string.to_graphemes(row)
+    graphemes
+    |> list.index_map(fn(col_index, c) {
+      #(Pos(row_index, col_index), string.from_grapheme(c))
+    })
   })
-  |> list.concat
-  |> map.from_list
+  |> list.flatten
+  |> Map
 }
 
-// Directions for neighbors (right, down, left, up)
 const directions = [Pos(0, 1), Pos(1, 0), Pos(0, -1), Pos(-1, 0)]
 
-// Check if a position is within bounds
-fn in_bounds(pos: Position, map: Map) -> Bool {
-  map |> map.keys |> list.member(pos)
+fn within_bounds(map: Map, pos: Position) -> Bool {
+  let Map(entries) = map
+  list.any(entries, fn(entry) {
+    let #(Pos(x, y), _) = entry
+    pos == Pos(x, y)
+  })
 }
 
-// Explore a region in the map
-fn explore_region(
+fn explore(
   map: Map,
-  visited: Map,
-  pos: Position,
+  stack: List(position),
+  area: Int,
+  perimeter: Int,
+  new_visited: List(position),
   char: String,
-) -> #(Int, Int, Map) {
-  let area = 0
-  let perimeter = 0
-  let stack = [pos]
-  let new_visited = visited
+) -> #(Int, Int, List(Position)) {
+  case stack {
+    [] -> #(area, perimeter, new_visited)
+    [current, ..rest] -> {
+      let stack = rest
+      let Map(entries) = map
 
-  while
-  list.is_empty(stack) == False
-  {
-    let [current, rest] = stack
-    let stack = rest
-
-    case map.get(current) {
-      Some(c) if c == char -> {
-        case new_visited.get(current) {
-          None -> {
-            let area = area + 1
-            let new_visited = map.insert(current, True, new_visited)
-
-            for
-            direction
-            in
-            directions
-            {
+      case
+        list.find(entries, fn(entry) {
+          let #(_, c) = entry
+          current == current && c == char
+        })
+      {
+        Ok(_) -> {
+          let new_visited = list.append(new_visited, [current])
+          let updated_stack_and_perimeter =
+            list.fold(directions, #(stack, perimeter), fn(direction, _) {
               let Pos(dx, dy) = direction
-              let Pos(x, y) = current
-              let neighbor = Pos(x + dx, y + dy)
+              let Pos(current_x, current_y) = current
+              let neighbor = Pos(current_x + dx, current_y + dy)
 
-              let #(new_stack, new_perimeter) = case in_bounds(neighbor, map) {
-                True -> {
-                  case map.get(neighbor) {
-                    Some(nc) if nc == char -> {
-                      case new_visited.get(neighbor) {
-                        None -> #([neighbor, stack], perimeter)
-                        Some(_) -> #(stack, perimeter + 1)
-                      }
-                    }
-                    _ -> {
-                      stack
-                      perimeter + 1
-                    }
+              case within_bounds(map, neighbor) {
+                True ->
+                  case list.contains(new_visited, neighbor) {
+                    True -> #(stack, perimeter)
+                    False -> #(list.append(stack, [neighbor]), perimeter)
                   }
-                }
-                False -> {
-                  stack
-                  perimeter + 1
-                }
+                False -> #(stack, perimeter + 1)
               }
-              let stack = new_stack
-              let perimeter = new_perimeter
-            }
-          }
-          Some(_) -> []
+            })
+          let #(stack, perimeter) = updated_stack_and_perimeter
+          explore(map, stack, area + 1, perimeter, new_visited, char)
         }
+        Error(_) -> #(area, perimeter, new_visited)
       }
-      _ -> []
     }
   }
-
-  tuple(area, perimeter, new_visited)
 }
 
-// Calculate the total cost of the map
 fn calculate_cost(map: Map) -> Int {
-  let visited = map.new()
+  let Map(entries) = map
+  let visited = []
   let total_cost = 0
 
-  for
-  {
-    let key = pos
-    let value = char
-  }
-  in
-  map
-  {
-    case visited.get(pos) {
-      None -> {
-        let #(area, perimeter, new_visited) =
-          explore_region(map, visited, pos, char)
-        let visited = new_visited
-        let total_cost = total_cost + { area * perimeter }
-      }
-      Some(_) -> total_cost
-    }
-  }
+  list.fold(entries, #(visited, total_cost), fn(entry, acc) {
+    let #(visited, total_cost) = acc
+    let #(pos, char) = entry
 
-  total_cost
+    case list.contains(visited, [pos]) {
+      True -> #(visited, total_cost)
+      False -> {
+        let #(_, _, new_visited) =
+          explore(map, [pos], 0, 0, visited, string.from_grapheme(char))
+        #(list.append(visited, new_visited), total_cost + { area * perimeter })
+      }
+    }
+  }).1
 }
 
-// Example usage
-pub fn main() {
-  let filename = "input.txt"
-  let input = io.read_file(filename)
+// Function to read the contents of a file
+fn read_file(filename: String) -> String {
+  let result = io.read_file(filename)
+  case result {
+    Ok(bytes) -> string_tree.to_string(bytes)
+    Error(_) -> ""
+  }
+}
 
+pub fn main() {
+  let input = read_file("input.txt")
   let map = parse_map(input)
   let cost = calculate_cost(map)
-
-  io.println(string.from_int(cost))
+  io.println(int.to_string(cost))
 }

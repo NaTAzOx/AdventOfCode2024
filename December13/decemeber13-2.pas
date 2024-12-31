@@ -13,21 +13,21 @@ uses
 
 type
   TButton = record
-    X, Y, Cost: Integer;
+    X, Y, Cost: Int64;
   end;
 
   TPrize = record
-    X, Y: Integer;
+    X, Y: Int64;
   end;
 
-function ParseValue(Line: string; Prefix: string): Integer;
+const
+  PrizeOffset = 10000000000000;
+
+function ParseValue(Line: string; Prefix: string): Int64;
 var
   StartPos, EndPos: Integer;
   ValueStr: string;
 begin
-  if Line = '' then
-    raise Exception.Create('Empty line encountered.');
-
   StartPos := Pos(Prefix, Line);
   if StartPos = 0 then
     raise Exception.Create('Prefix "' + Prefix + '" not found in line: ' + Line);
@@ -35,36 +35,32 @@ begin
   StartPos := StartPos + Length(Prefix);
   EndPos := StartPos;
 
-  // Find the end of the numeric value
   while (EndPos <= Length(Line)) and (Line[EndPos] in ['0'..'9']) do
     Inc(EndPos);
 
   ValueStr := Copy(Line, StartPos, EndPos - StartPos);
-  Result := StrToInt(ValueStr);
+  Result := StrToInt64(ValueStr);
 end;
 
-function CalculateCost(ButtonA, ButtonB: TButton; Prize: TPrize; MaxPress: Integer): Integer;
+function CalculateCost(ButtonA, ButtonB: TButton; Prize: TPrize): Int64;
 var
-  aPress, bPress: Integer;
-  MinCost: Integer;
+  DistanceA, DistanceB, TotalCostA, TotalCostB: Int64;
 begin
-  MinCost := MaxInt;
+  // Calcul des distances
+  DistanceA := Abs(Prize.X - ButtonA.X) + Abs(Prize.Y - ButtonA.Y);
+  DistanceB := Abs(Prize.X - ButtonB.X) + Abs(Prize.Y - ButtonB.Y);
 
-  // Tester toutes les combinaisons de pressions sur les boutons
-  for aPress := 0 to MaxPress do
-    for bPress := 0 to MaxPress do
-    begin
-      if (aPress * ButtonA.X + bPress * ButtonB.X = Prize.X) and
-         (aPress * ButtonA.Y + bPress * ButtonB.Y = Prize.Y) then
-      begin
-        MinCost := Min(MinCost, aPress * ButtonA.Cost + bPress * ButtonB.Cost);
-      end;
-    end;
+  WriteLn('Debug - DistanceA: ', DistanceA, ' DistanceB: ', DistanceB);
 
-  if MinCost = MaxInt then
-    Result := -1 // Pas de solution
-  else
-    Result := MinCost;
+  // Calcul des coûts
+  TotalCostA := DistanceA * ButtonA.Cost;
+  TotalCostB := DistanceB * ButtonB.Cost;
+
+  WriteLn('Debug - TotalCostA: ', TotalCostA, ' TotalCostB: ', TotalCostB);
+
+  // Retourner le coût minimum
+  Result := Min(TotalCostA, TotalCostB);
+  WriteLn('Debug - Result: ', Result);
 end;
 
 var
@@ -72,7 +68,8 @@ var
   Line: string;
   ButtonA, ButtonB: TButton;
   Prize: TPrize;
-  TokensSpent, PrizeCount, MaxPress, Cost, i, machineNumber: Integer;
+  TokensSpent, PrizeCount, Cost: Int64;
+  i, machineNumber: Integer;
   FileName: string;
 begin
   FileName := 'input.txt';
@@ -83,7 +80,6 @@ begin
 
     TokensSpent := 0;
     PrizeCount := 0;
-    MaxPress := 100;
     machineNumber := 0;
 
     for i := 0 to (Lines.Count div 3) - 1 do
@@ -111,16 +107,25 @@ begin
       if Line = '' then
         Continue;
       WriteLn('Processing line: ', Line);
-      Prize.X := ParseValue(Line, 'X=');
-      Prize.Y := ParseValue(Line, 'Y=');
+      Prize.X := ParseValue(Line, 'X=') + PrizeOffset;
+      Prize.Y := ParseValue(Line, 'Y=') + PrizeOffset;
 
-      Cost := CalculateCost(ButtonA, ButtonB, Prize, MaxPress);
+      WriteLn('ButtonA: X=', ButtonA.X, ' Y=', ButtonA.Y, ' Cost=', ButtonA.Cost);
+      WriteLn('ButtonB: X=', ButtonB.X, ' Y=', ButtonB.Y, ' Cost=', ButtonB.Cost);
+      WriteLn('Prize: X=', Prize.X, ' Y=', Prize.Y);
+
+      Cost := CalculateCost(ButtonA, ButtonB, Prize);
+      WriteLn('Cost: ', Cost);
       if Cost <> -1 then
+      begin
         TokensSpent := TokensSpent + Cost;
+        PrizeCount := PrizeCount + 1;
+      end;
       machineNumber := machineNumber + 1;
     end;
 
     WriteLn('Total tokens spent: ', TokensSpent);
+    WriteLn('Total prizes won: ', PrizeCount);
   finally
     Lines.Free;
   end;

@@ -12,7 +12,7 @@
 - Day 10 : Perl (enjoyment : 8.5/10)
 - Day 11 : C++ (enjoyment : 6/10)
 - Day 12 : Gleam! [NOT FINISHED] (enjoyment : 1.5/10)
-- Day 13 : Pascal [NOT FINISHED] (enjoyment : 4/10)
+- Day 13 : Pascal [NOT FINISHED] (enjoyment : 5/10)
 - Day 14 : Scala (enjoyment : 7.5/10)
 - Day 15 : EmojiCode [NOT FINISHED] (enjoyment : no)
 - Day 16 : Java [NOT FINISHED] (enjoyment : 6.5/10)
@@ -20,5 +20,10 @@
 - Day 18 : Kotlin (enjoyment : 7.5/10)
 - Day 19 : Dreamberd [NOT STARTED] (enjoyment : ?/10)
 - Day 20 : Haskell [NOT FINISHED] (enjoyment : 1.5/10)
+- Day 21 : R [NOT FINISHED] (enjoyment : 0.5/10)
+- Day 22 : B [NOT FINISHED] (enjoyment : huh)
+- Day 23 : Ada [NOT FINISHED] (enjoyment : What the..)
+- Day 24 : JavaScript [NOT FINISHED] (enjoyment : 8.5/10)
+- Day 25 : Ruby [NOT FINISHED] (enjoyment : 7/10)
 
 ### Note : the enjoyment is only determined by the language used 
