@@ -27,3 +27,5 @@
 - Day 25 : Ruby [NOT FINISHED] (enjoyment : 7/10)
 
 ### Note : the enjoyment is only determined by the language used 
+
+# Result : 28/50 (Pretty good for first time challenger I guess)
